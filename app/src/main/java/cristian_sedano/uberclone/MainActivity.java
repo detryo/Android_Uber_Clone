@@ -23,10 +23,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import cristian_sedano.uberclone.Model.User;
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity {
+
+    public Button btnSingIn;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -42,14 +45,9 @@ public class MainActivity extends AppCompatActivity {
                 .setFontAttrId(R.attr.fontPath).build());
         setContentView(R.layout.activity_main);
 
-        setBtnSingIn();
         setBtnregister();
-    }
 
-    private void setBtnSingIn(){
-
-        Button btnSingIn = (Button) findViewById(R.id.buttomSingIn);
-
+        btnSingIn = (Button) findViewById(R.id.buttomSingIn);
         btnSingIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
+
     private void setBtnregister(){
 
         Button btnRegister = (Button) findViewById(R.id.buttonRegister);
@@ -99,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
 
                 dialog.dismiss();
+                // Set disable button Sign In if is proccessing
+                btnSingIn.setEnabled(false);
 
                 //Check validation
                 if (TextUtils.isEmpty(editEmail.getText().toString())){
@@ -116,10 +116,17 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                // nuevo
+                final android.app.AlertDialog waitingDialog = new SpotsDialog(MainActivity.this);
+                waitingDialog.show();
+
                 // Login
                 auth.signInWithEmailAndPassword(editEmail.getText().toString(), editPassword.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
+
+                        // nuevo
+                        waitingDialog.dismiss();
 
                         startActivity(new Intent(MainActivity.this, Welcome.class));
                         finish();
@@ -127,7 +134,15 @@ public class MainActivity extends AppCompatActivity {
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+
+                        // nuevo
+                        waitingDialog.dismiss();
+
                         Snackbar.make(rootLayout, "Failed" + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+
+                        // Active button
+                        btnSingIn.setEnabled(true);
+
                     }
                 });
 
